@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:repairme/service/order_provider.dart';
 
 import 'service/services.dart';
 import 'ui/order_list_page.dart';
@@ -17,7 +19,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.red,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: OrderListPage(),
+      home: ChangeNotifierProvider.value(
+        value: service<OrderProvider>(),
+        child: OrderListPage(),
+      ),
       debugShowCheckedModeBanner: false,
     );
   }

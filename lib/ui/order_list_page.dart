@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:repairme/model/order.dart';
+import 'package:repairme/service/order_provider.dart';
 
 import '../service/order_builder.dart';
 import '../service/services.dart';
@@ -10,9 +12,54 @@ class OrderListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add components')),
-      body: Center(child: Text('Component List')),
+      appBar: AppBar(title: Text('Orders')),
+      body: Consumer<OrderProvider>(
+        builder: (_, provider, __) {
+          return ListView(
+            children: provider.orders
+                .map((order) => _OrderItem(order: order))
+                .toList(),
+          );
+        },
+      ),
       floatingActionButton: _AddOrderButton(),
+    );
+  }
+}
+
+class _OrderItem extends StatelessWidget {
+  const _OrderItem({
+    Key key,
+    @required this.order,
+  }) : super(key: key);
+
+  final Order order;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = order.amount * order.component.price;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: ListTile(
+        title: Row(
+          children: [
+            Text('${order.amount}x',
+                style: Theme.of(context).textTheme.headline6),
+            const SizedBox(width: 16.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${order.component.name}'),
+                Text(
+                  '${order.component.price}฿ each',
+                  style: Theme.of(context).textTheme.caption,
+                )
+              ],
+            ),
+          ],
+        ),
+        trailing: Text('Total: $total'),
+      ),
     );
   }
 }
@@ -33,7 +80,7 @@ class _AddOrderButton extends StatelessWidget {
             child: NewOrderDialog(),
           ),
         );
-        print('Created $order');
+        context.read<OrderProvider>().addOrder(order);
       },
     );
   }
