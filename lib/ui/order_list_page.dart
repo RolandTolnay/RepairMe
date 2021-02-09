@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:repairme/model/order.dart';
-import 'package:repairme/service/order_provider.dart';
 
+import '../model/order.dart';
 import '../service/order_builder.dart';
+import '../service/order_provider.dart';
 import '../service/services.dart';
 
 class OrderListPage extends StatelessWidget {
@@ -11,29 +11,61 @@ class OrderListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Orders')),
-      body: Consumer<OrderProvider>(
-        builder: (_, provider, __) {
-          return ListView(
-            children: provider.orders
-                .map((order) => _OrderItem(order: order))
-                .toList(),
-          );
-        },
+    return Consumer<OrderProvider>(
+      builder: (_, provider, __) {
+        return Column(children: [
+          _AddOrderButton(),
+          ...provider.orders.map((order) => _OrderItem(order: order)).toList(),
+        ]);
+      },
+    );
+  }
+}
+
+class _AddOrderButton extends StatelessWidget {
+  const _AddOrderButton({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        height: 50,
+        child: FlatButton(
+          color: Theme.of(context).colorScheme.primary,
+          textColor: Theme.of(context).colorScheme.onPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.add),
+              const SizedBox(width: 8.0),
+              const Text('ADD ORDER')
+            ],
+          ),
+          onPressed: () async {
+            final order = await showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => Provider(
+                create: (_) => service<OrderBuilder>(),
+                child: _NewOrderDialog(),
+              ),
+            );
+            context.read<OrderProvider>().addOrder(order);
+          },
+        ),
       ),
-      floatingActionButton: _AddOrderButton(),
     );
   }
 }
 
 class _OrderItem extends StatelessWidget {
-  const _OrderItem({
-    Key key,
-    @required this.order,
-  }) : super(key: key);
-
   final Order order;
+
+  const _OrderItem({Key key, @required this.order}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +82,9 @@ class _OrderItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('${order.component.name}'),
-                Text(
-                  '${order.component.price}฿ each',
-                  style: Theme.of(context).textTheme.caption,
-                )
+                const SizedBox(height: 4.0),
+                Text('${order.component.price}฿ each',
+                    style: Theme.of(context).textTheme.caption)
               ],
             ),
           ],
@@ -64,30 +95,8 @@ class _OrderItem extends StatelessWidget {
   }
 }
 
-class _AddOrderButton extends StatelessWidget {
-  const _AddOrderButton({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      child: const Icon(Icons.add),
-      onPressed: () async {
-        final order = await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) => Provider(
-            create: (_) => service<OrderBuilder>(),
-            child: NewOrderDialog(),
-          ),
-        );
-        context.read<OrderProvider>().addOrder(order);
-      },
-    );
-  }
-}
-
-class NewOrderDialog extends StatelessWidget {
-  const NewOrderDialog({Key key}) : super(key: key);
+class _NewOrderDialog extends StatelessWidget {
+  const _NewOrderDialog({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

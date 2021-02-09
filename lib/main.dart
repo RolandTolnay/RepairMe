@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:repairme/service/order_provider.dart';
 
+import 'service/appointment_builder.dart';
 import 'service/services.dart';
-import 'ui/order_list_page.dart';
+import 'ui/root_page.dart';
 
 void main() {
   setupProviders();
@@ -19,9 +19,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.red,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: ChangeNotifierProvider.value(
-        value: service<OrderProvider>(),
-        child: OrderListPage(),
+      home: ChangeNotifierProvider(
+        create: (_) => service<AppointmentBuilder>(),
+        child: RootPage(),
       ),
       debugShowCheckedModeBanner: false,
     );
