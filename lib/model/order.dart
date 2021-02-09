@@ -5,11 +5,11 @@ import 'component.dart';
 
 class Order {
   final String id;
-  final Component components;
+  final Component component;
   final int amount;
 
   Order({
-    @required this.components,
+    @required this.component,
     @required this.amount,
     id,
   }) : id = id ?? Uuid().v4();
