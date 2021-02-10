@@ -35,7 +35,7 @@ class _AddOrderButton extends StatelessWidget {
           color: Theme.of(context).colorScheme.primary,
           textColor: Theme.of(context).colorScheme.onPrimary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: BorderRadius.circular(10.0),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
