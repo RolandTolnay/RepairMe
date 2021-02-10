@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:repairme/ui/repair_shop_search.dart';
 import 'package:transparent_image/transparent_image.dart';
 
+import '../model/repair_shop.dart';
 import '../service/repair_shop_provider.dart';
+import 'repair_shop_search.dart';
 
 class RepairShopListPage extends StatelessWidget {
-  const RepairShopListPage({Key key}) : super(key: key);
+  final ValueChanged<RepairShop> onRepairShopSelected;
+
+  const RepairShopListPage({this.onRepairShopSelected, Key key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +33,7 @@ class RepairShopListPage extends StatelessWidget {
                     context: context,
                     delegate: RepairShopSearch(provider.repairShops));
                 provider.selectRepairShop(repairShop);
+                onRepairShopSelected?.call(repairShop);
               },
             ),
             OutlineButton.icon(
@@ -51,7 +56,7 @@ class RepairShopListPage extends StatelessWidget {
           ],
         ),
         Container(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: MediaQuery.of(context).size.height * 0.5,
           child: ListView(children: [
             ...provider.repairShops.map((shop) {
               final rating = Row(

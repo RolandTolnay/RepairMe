@@ -7,14 +7,21 @@ import '../service/order_provider.dart';
 import '../service/services.dart';
 
 class OrderListPage extends StatelessWidget {
-  const OrderListPage({Key key}) : super(key: key);
+  final ValueChanged<List<Order>> onOrderListChanged;
+
+  const OrderListPage({this.onOrderListChanged, Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Consumer<OrderProvider>(
       builder: (_, provider, __) {
         return Column(children: [
-          _AddOrderButton(),
+          _AddOrderButton(
+            onOrderAdded: (order) {
+              provider.addOrder(order);
+              onOrderListChanged?.call(provider.orders);
+            },
+          ),
           ...provider.orders.map((order) => _OrderItem(order: order)).toList(),
         ]);
       },
@@ -23,7 +30,9 @@ class OrderListPage extends StatelessWidget {
 }
 
 class _AddOrderButton extends StatelessWidget {
-  const _AddOrderButton({Key key}) : super(key: key);
+  final ValueChanged<Order> onOrderAdded;
+
+  const _AddOrderButton({this.onOrderAdded, Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +63,9 @@ class _AddOrderButton extends StatelessWidget {
                 child: _NewOrderDialog(),
               ),
             );
-            context.read<OrderProvider>().addOrder(order);
+            if (order != null) {
+              onOrderAdded?.call(order);
+            }
           },
         ),
       ),

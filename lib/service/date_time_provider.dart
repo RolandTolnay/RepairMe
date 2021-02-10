@@ -65,5 +65,6 @@ class RMDateTimeProvider extends ChangeNotifier implements DateTimeProvider {
   @override
   void selectTimeSlot(TimeSlot slot) {
     _selectedTimeSlot = slot;
+    notifyListeners();
   }
 }

@@ -5,7 +5,7 @@ import '../model/date_time_utility.dart';
 import '../service/date_time_provider.dart';
 
 class DateTimePickerPage extends StatelessWidget {
-  final VoidCallback onDateTimePicked;
+  final ValueChanged<DateTime> onDateTimePicked;
 
   const DateTimePickerPage({this.onDateTimePicked, Key key}) : super(key: key);
 
@@ -31,8 +31,9 @@ class DateTimePickerPage extends StatelessWidget {
             timeSlot,
             onTimeSlotPicked: (timeSlot) {
               provider.selectTimeSlot(timeSlot);
-              onDateTimePicked?.call();
+              onDateTimePicked?.call(provider.commitedDateTime);
             },
+            isSelected: timeSlot == provider.selectedTimeSlot,
           );
         }).toList(),
       );
@@ -48,7 +49,7 @@ class DateTimePickerPage extends StatelessWidget {
         ),
         SizedBox(height: 32.0),
         Container(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: MediaQuery.of(context).size.height * 0.5,
           child: content,
         )
       ],
@@ -90,31 +91,40 @@ class _TimeSlotButton extends StatelessWidget {
   _TimeSlotButton(
     this.timeSlot, {
     this.onTimeSlotPicked,
+    this.isSelected = false,
     Key key,
   }) : super(key: key);
 
   final TimeSlot timeSlot;
   final ValueChanged<TimeSlot> onTimeSlotPicked;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
     final color = timeSlot.isBooked
         ? Theme.of(context).disabledColor
         : Theme.of(context).colorScheme.primaryVariant;
-    final textStyle = Theme.of(context).textTheme.subtitle1.copyWith(
-          color: color,
-          fontWeight: FontWeight.w500,
-        );
+    final textColor =
+        isSelected ? Theme.of(context).colorScheme.onPrimary : color;
+    final textStyle = Theme.of(context)
+        .textTheme
+        .subtitle1
+        .copyWith(fontWeight: FontWeight.w500, color: textColor);
+
     final timeDescription = MaterialLocalizations.of(context).formatTimeOfDay(
       timeSlot.timeOfDay,
       alwaysUse24HourFormat: true,
     );
+    final text = Text('${timeDescription}', style: textStyle);
 
-    return OutlineButton(
-      borderSide: BorderSide(color: color, width: 2),
-      child: Text('${timeDescription}', style: textStyle),
-      onPressed:
-          timeSlot.isBooked ? null : () => onTimeSlotPicked?.call(timeSlot),
-    );
+    final onPressed =
+        timeSlot.isBooked ? null : () => onTimeSlotPicked?.call(timeSlot);
+
+    return isSelected
+        ? FlatButton(color: color, child: text, onPressed: onPressed)
+        : OutlineButton(
+            borderSide: BorderSide(color: color, width: 2),
+            child: text,
+            onPressed: onPressed);
   }
 }

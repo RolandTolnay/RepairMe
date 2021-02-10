@@ -38,19 +38,24 @@ class _RootPageState extends State<RootPage> {
       Step(
           isActive: _currentStep == 0,
           state: _stepState[0],
-          title: Text('Orders'),
-          content: OrderListPage()),
+          title: const Text('Orders'),
+          content: OrderListPage(
+            onOrderListChanged: (orders) {
+              context.read<AppointmentBuilder>().setOrders(orders);
+            },
+          )),
       Step(
         isActive: _currentStep == 1,
         state: _stepState[1],
-        title: Text('Date'),
-        content: DateTimePickerPage(onDateTimePicked: _onStepContinue),
+        title: const Text('Date'),
+        content: DateTimePickerPage(onDateTimePicked: (_) => _onStepContinue),
       ),
       Step(
         isActive: _currentStep == 2,
         state: _stepState[2],
-        title: Text('Repair Shop'),
-        content: RepairShopListPage(),
+        title: const Text('Repair Shop'),
+        content:
+            RepairShopListPage(onRepairShopSelected: (_) => _onStepContinue),
       )
     ];
 
@@ -88,6 +93,13 @@ class _RootPageState extends State<RootPage> {
         _currentStep += 1;
         _updateStepState();
       });
+    } else {
+      final completedStepper = _stepState.keys.every(_isStepCompleted);
+      if (completedStepper) {
+        final appointment = builder.makeAppointment();
+        print(appointment);
+        showDialog(context: context, child: _buildStepperCompletedDialog());
+      }
     }
   }
 
@@ -108,19 +120,39 @@ class _RootPageState extends State<RootPage> {
   }
 
   void _updateStepState() {
-    final builder = context.read<AppointmentBuilder>();
-
-    final isStepStateValid = {
-      0: builder.hasValidOrders,
-      1: builder.hasValidDate,
-      2: builder.hasValidRepairShop
-    };
     _stepState.keys.forEach((step) {
       if (_stepState[step] == StepState.editing) {
         _stepState[step] =
-            isStepStateValid[step] ? StepState.complete : StepState.error;
+            _isStepCompleted(step) ? StepState.complete : StepState.error;
       }
     });
     _stepState[_currentStep] = StepState.editing;
+  }
+
+  bool _isStepCompleted(int step) {
+    final builder = context.read<AppointmentBuilder>();
+
+    switch (step) {
+      case 0:
+        return builder.hasValidOrders;
+      case 1:
+        return builder.hasValidDate;
+      case 2:
+        return builder.hasValidRepairShop;
+      default:
+        return false;
+    }
+  }
+
+  AlertDialog _buildStepperCompletedDialog() {
+    return AlertDialog(
+      title: const Text('Good job!'),
+      actions: [
+        FlatButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('THANKS'),
+        )
+      ],
+    );
   }
 }
