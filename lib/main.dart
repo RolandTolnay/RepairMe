@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:repairme/service/date_time_provider.dart';
 
 import 'service/appointment_builder.dart';
+import 'service/date_time_provider.dart';
 import 'service/order_provider.dart';
+import 'service/repair_shop_provider.dart';
 import 'service/services.dart';
 import 'ui/root_page.dart';
 
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => service<AppointmentBuilder>()),
           ChangeNotifierProvider(create: (_) => service<OrderProvider>()),
           ChangeNotifierProvider(create: (_) => service<DateTimeProvider>()),
+          ChangeNotifierProvider(create: (_) => service<RepairShopProvider>()),
         ],
         child: RootPage(),
       ),

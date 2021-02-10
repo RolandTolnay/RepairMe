@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../model/repair_shop.dart';
 import '../service/appointment_builder.dart';
-import '../service/order_provider.dart';
 import '../service/date_time_provider.dart';
+import '../service/order_provider.dart';
+import '../service/repair_shop_provider.dart';
 import 'datetime_picker_page.dart';
 import 'order_list_page.dart';
-import 'package:repairme/model/date_time_utility.dart';
+import 'repair_shop_list_page.dart';
 
 class RootPage extends StatefulWidget {
   const RootPage({Key key}) : super(key: key);
@@ -50,9 +50,7 @@ class _RootPageState extends State<RootPage> {
         isActive: _currentStep == 2,
         state: _stepState[2],
         title: Text('Repair Shop'),
-        content: Center(
-          child: Text('Shop selector'),
-        ),
+        content: RepairShopListPage(),
       )
     ];
 
@@ -77,16 +75,12 @@ class _RootPageState extends State<RootPage> {
         builder.setOrders(context.read<OrderProvider>().orders);
         break;
       case 1:
-        final dateTimeProvider = context.read<DateTimeProvider>();
-        DateTime date;
-        if (dateTimeProvider.selectedTimeSlot != null) {
-          date = dateTimeProvider.selectedDate
-              .withTimeOfDay(dateTimeProvider.selectedTimeSlot.timeOfDay);
-        }
-        builder.selectDate(date);
+        builder.selectDate(context.read<DateTimeProvider>().commitedDateTime);
         break;
       case 2:
-        builder.selectRepairShop(RepairShop());
+        builder.selectRepairShop(
+          context.read<RepairShopProvider>().selectedRepairShop,
+        );
         break;
     }
     if (_currentStep < _steps.length - 1) {
