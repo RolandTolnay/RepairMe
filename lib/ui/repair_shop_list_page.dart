@@ -16,99 +16,116 @@ class RepairShopListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<RepairShopProvider>();
 
+    final searchButton = OutlineButton.icon(
+      icon: Icon(Icons.search),
+      label: Text('Search'),
+      borderSide:
+          BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+      textColor: Theme.of(context).colorScheme.primary,
+      onPressed: () async {
+        final repairShop = await showSearch(
+            context: context, delegate: RepairShopSearch(provider.repairShops));
+        provider.selectRepairShop(repairShop);
+        onRepairShopSelected?.call(repairShop);
+      },
+    );
+
+    final sortButton = OutlineButton.icon(
+      icon: Icon(Icons.sort),
+      label: Text('Sort'),
+      borderSide:
+          BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+      textColor: Theme.of(context).colorScheme.primary,
+      onPressed: () async {
+        final sortConfiguration = await showDialog<RepairShopSortConfiguration>(
+          context: context,
+          builder: (_) => _SortDialog(provider.sortConfiguration),
+        );
+        if (sortConfiguration != null) {
+          provider.sortRepairShopsBy(sortConfiguration);
+        }
+      },
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            OutlineButton.icon(
-              icon: Icon(Icons.search),
-              label: Text('Search'),
-              borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.primary, width: 2),
-              textColor: Theme.of(context).colorScheme.primary,
-              onPressed: () async {
-                final repairShop = await showSearch(
-                    context: context,
-                    delegate: RepairShopSearch(provider.repairShops));
-                provider.selectRepairShop(repairShop);
-                onRepairShopSelected?.call(repairShop);
-              },
-            ),
-            OutlineButton.icon(
-              icon: Icon(Icons.sort),
-              label: Text('Sort'),
-              borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.primary, width: 2),
-              textColor: Theme.of(context).colorScheme.primary,
-              onPressed: () async {
-                final sortConfiguration =
-                    await showDialog<RepairShopSortConfiguration>(
-                  context: context,
-                  builder: (_) => _SortDialog(provider.sortConfiguration),
-                );
-                if (sortConfiguration != null) {
-                  provider.sortRepairShopsBy(sortConfiguration);
-                }
-              },
-            ),
-          ],
+          children: [searchButton, sortButton],
         ),
         Container(
           height: MediaQuery.of(context).size.height * 0.5,
           child: ListView(children: [
-            ...provider.repairShops.map((shop) {
-              final rating = Row(
-                children: [
-                  Icon(
-                    Icons.star,
-                    size: 12,
-                    color: Theme.of(context).disabledColor,
-                  ),
-                  Text('${shop.rating}')
-                ],
-              );
-
-              return ListTile(
-                tileColor: shop == provider.selectedRepairShop
-                    ? Theme.of(context).highlightColor
-                    : null,
-                leading: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: FadeInImage.memoryNetwork(
-                    fit: BoxFit.cover,
-                    placeholder: kTransparentImage,
-                    imageErrorBuilder: (context, error, stackTrace) {
-                      return CircleAvatar(backgroundColor: Colors.black12);
-                    },
-                    image: shop.logoUrl,
-                  ),
-                ),
-                title: Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(shop.name),
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      rating,
-                      Text('${shop.distance} ly'),
-                      Text('${shop.price} ฿'),
-                    ],
-                  ),
-                ),
-                onTap: () {
-                  provider.selectRepairShop(shop);
-                },
-              );
-            }).toList()
+            ...provider.repairShops
+                .map((shop) => _RepairShopItem(
+                      shop,
+                      isSelected: shop == provider.selectedRepairShop,
+                      onTapped: () {
+                        provider.selectRepairShop(shop);
+                        onRepairShopSelected?.call(shop);
+                      },
+                    ))
+                .toList()
           ]),
         ),
       ],
+    );
+  }
+}
+
+class _RepairShopItem extends StatelessWidget {
+  const _RepairShopItem(
+    this.repairShop, {
+    this.onTapped,
+    this.isSelected = false,
+    Key key,
+  }) : super(key: key);
+
+  final RepairShop repairShop;
+  final bool isSelected;
+  final VoidCallback onTapped;
+
+  @override
+  Widget build(BuildContext context) {
+    final rating = Row(
+      children: [
+        Icon(Icons.star, size: 12, color: Theme.of(context).disabledColor),
+        Text('${repairShop.rating}')
+      ],
+    );
+
+    return ListTile(
+      tileColor: isSelected ? Theme.of(context).highlightColor : null,
+      leading: SizedBox(
+        height: 50,
+        width: 50,
+        child: FadeInImage.memoryNetwork(
+          fit: BoxFit.cover,
+          placeholder: kTransparentImage,
+          imageErrorBuilder: (_, error, ___) {
+            print('Failed loading image: $error');
+            return CircleAvatar(backgroundColor: Colors.black12);
+          },
+          image: repairShop.logoUrl,
+        ),
+      ),
+      title: Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Text(repairShop.name),
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            rating,
+            Text('${repairShop.distance} ly'),
+            Text('${repairShop.price} ฿'),
+          ],
+        ),
+      ),
+      onTap: () => onTapped?.call(),
     );
   }
 }

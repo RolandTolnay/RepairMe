@@ -1,11 +1,10 @@
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../service/date_time_provider.dart';
 import 'repair_shop.dart';
+import 'time_slot.dart';
 
 class ModelMock {
   static List<TimeSlot> timeSlotListForDate(DateTime date) {

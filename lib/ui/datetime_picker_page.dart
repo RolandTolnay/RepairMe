@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../model/date_time_utility.dart';
+import '../model/time_slot.dart';
 import '../service/date_time_provider.dart';
 
 class DateTimePickerPage extends StatelessWidget {

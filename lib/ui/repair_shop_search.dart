@@ -13,7 +13,7 @@ class RepairShopSearch extends SearchDelegate<RepairShop> {
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: Icon(Icons.clear),
+        icon: const Icon(Icons.clear),
         onPressed: () {
           query = '';
         },
@@ -24,7 +24,7 @@ class RepairShopSearch extends SearchDelegate<RepairShop> {
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.arrow_back),
+      icon: const Icon(Icons.arrow_back),
       onPressed: () {
         close(context, null);
       },
@@ -33,25 +33,23 @@ class RepairShopSearch extends SearchDelegate<RepairShop> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return ListView(
-        children: repairShops
-            .where((r) => r.name.toLowerCase().contains(query.toLowerCase()))
-            .map((shop) => ListTile(
-                  title: Text(shop.name),
-                  onTap: () => close(context, shop),
-                ))
-            .toList());
+    return _buildRepairShopListView(context);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
+    return _buildRepairShopListView(context);
+  }
+
+  ListView _buildRepairShopListView(BuildContext context) {
     return ListView(
-        children: repairShops
-            .where((a) => a.name.toLowerCase().contains(query.toLowerCase()))
-            .map((activity) => ListTile(
-                  title: Text(activity.name),
-                  onTap: () => close(context, activity),
-                ))
-            .toList());
+      children: repairShops
+          .where((r) => r.name.toLowerCase().contains(query.toLowerCase()))
+          .map((shop) => ListTile(
+                title: Text(shop.name),
+                onTap: () => close(context, shop),
+              ))
+          .toList(),
+    );
   }
 }
